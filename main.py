@@ -73,7 +73,7 @@ df_totais = pd.DataFrame({
 })
 
 # Nome do Arquivo
-arquivo_excel = "fechamento_caixa2.xlsx"
+arquivo_excel = "fechamento_caixa.xlsx"
 data_fechamento = datetime.now().strftime("%d-%m-%Y")
 
 # Salvar no Excel
