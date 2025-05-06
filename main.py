@@ -1,5 +1,7 @@
 import pandas as pd
 from datetime import datetime
+import os
+from openpyxl import load_workbook
 
 total = 0.00
 total_cheque = 0.00
@@ -26,7 +28,7 @@ def recibos():
         subtotal = recibo * qtd
         total += subtotal
         total_recibos += qtd
-        recibos_detalhes.append({"Valor do Recibo": recibo, "Quantidade": qtd, "Valor Total": subtotal})
+        recibos_detalhes.append({"Quantidade": qtd, "Valor do Recibo": recibo, "Valor Total": subtotal})
         
     return recibos_detalhes
 
@@ -58,28 +60,34 @@ def fechamento():
 
         except ValueError:
             print("X Entrada Inválida! Digite apenas números.")
+
+def salvar_fechamento():
+    arquivo_excel = "fechamento_caixa.xlsx"
+    data_fechamento = f"Fechamento_{datetime.now().strftime('%d-%m-%Y')}"
+
+    df_recibos = pd.DataFrame(recibos_detalhes)
     
+    totais_formatados = [
+        {"Quantidade": "", "Valor do Recibo": "Total Recibos", "Valor Total": total},
+        {"Quantidade": "", "Valor do Recibo": "Total Cheques", "Valor Total": total_cheque},
+        {"Quantidade": "", "Valor do Recibo": "Total Dinheiro", "Valor Total": total_dinheiro},
+    ]
+
+    df_totais = pd.DataFrame(totais_formatados)
+
+    df_final = pd.concat([df_recibos, pd.DataFrame([{}]), df_totais], ignore_index=True)
+
+    if os.path.exists(arquivo_excel):
+        wb = load_workbook(arquivo_excel)
+        if data_fechamento in wb.sheetnames:
+            del wb[data_fechamento]
+            wb.save(arquivo_excel)
+
+    with pd.ExcelWriter(arquivo_excel, engine="openpyxl", mode='a') as writer:
+        df_final.to_excel(writer, sheet_name=data_fechamento, index=False)
+
+    print(f"✅ Fechamento de Caixa Salvo na aba '{data_fechamento}' dentro do arquivo {arquivo_excel}!")
+
 recibos()
 fechamento()
-
-# Criando DataFrame para os recibos
-df_recibos = pd.DataFrame(recibos_detalhes)
-
-# Criando um DataFrame para os totais
-df_totais = pd.DataFrame({
-    "Total Recibos": [total],
-    "Total Cheques": [total_cheque],
-    "Total Dinheiro": [total_dinheiro]
-})
-
-# Nome do Arquivo
-arquivo_excel = "fechamento_caixa.xlsx"
-data_fechamento = datetime.now().strftime("%d-%m-%Y")
-
-# Salvar no Excel
-
-with pd.ExcelWriter(arquivo_excel, mode='w', engine="openpyxl") as writer:
-    df_recibos.to_excel(writer, sheet_name=data_fechamento, index=False)
-    df_totais.to_excel(writer, sheet_name=data_fechamento, startrow=len(df_recibos) + 2, index=False)
-
-print(f"\nFechamento de Caixa Salvo! '{data_fechamento}' dentro do arquivo {arquivo_excel}!")
+salvar_fechamento()
