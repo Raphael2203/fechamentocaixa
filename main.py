@@ -15,6 +15,7 @@ def recibos():
     while True:
         recibo_input = input("Digite o Valor do recibo (Ou pressione ENTER para finalizar): ")
         if recibo_input == "":
+            print(f"O valor total do caixa é de {total}")
             break
         
         try:
@@ -29,7 +30,7 @@ def recibos():
         total += subtotal
         total_recibos += qtd
         recibos_detalhes.append({"Quantidade": qtd, "Valor do Recibo": recibo, "Valor Total": subtotal})
-        
+   
     return recibos_detalhes
 
 def fechamento():
@@ -41,12 +42,15 @@ def fechamento():
                 valores_cheques = [float(valor.strip()) for valor in cheques_input.split(",")]
                 cheques.extend(valores_cheques)
                 total_cheque = sum(cheques)
+                subtotal_cheque = total - total_cheque
+                print(f"O valor total - cheques é de R${subtotal_cheque}.")
                 break
             
             except ValueError:
                 print("X Entrada inválida! Certifique-se de separar corretamente por vírgula!")
         else:
             break
+        
             
 
     # Somar valores de dinheiro até o usuário pressionar Enter sem digitar nada pra finalizar
@@ -57,12 +61,14 @@ def fechamento():
             break
         try:
             total_dinheiro += float(dinheiro_input)
+            subtotal_geral = subtotal_cheque - total_dinheiro
+            print(f"O subtotal geral é de R${subtotal_geral}")
 
         except ValueError:
             print("X Entrada Inválida! Digite apenas números.")
 
 def salvar_fechamento():
-    arquivo_excel = "fechamento_caixa.xlsx"
+    arquivo_excel = "fechamento_caixa2.xlsx"
     data_fechamento = f"Fechamento_{datetime.now().strftime('%d-%m-%Y')}"
 
     df_recibos = pd.DataFrame(recibos_detalhes)
