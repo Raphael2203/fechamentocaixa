@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import os
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 
 total = 0.00
 total_cheque = 0.00
@@ -68,7 +68,7 @@ def fechamento():
             print("X Entrada Inválida! Digite apenas números.")
 
 def salvar_fechamento():
-    arquivo_excel = "fechamento_caixa2.xlsx"
+    arquivo_excel = os.path.join(os.getcwd(), "fechamento_caixa.xlsx")
     data_fechamento = f"Fechamento_{datetime.now().strftime('%d-%m-%Y')}"
 
     df_recibos = pd.DataFrame(recibos_detalhes)
@@ -82,6 +82,13 @@ def salvar_fechamento():
     df_totais = pd.DataFrame(totais_formatados)
 
     df_final = pd.concat([df_recibos, pd.DataFrame([{}]), df_totais], ignore_index=True)
+
+    if not os.path.exists(arquivo_excel):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Fechamentos"
+        wb.save(arquivo_excel)
+        print(f"Arquivo '{arquivo_excel}' criado porque não existia.")
 
     if os.path.exists(arquivo_excel):
         wb = load_workbook(arquivo_excel)
