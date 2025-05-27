@@ -2,6 +2,8 @@ import pandas as pd
 from datetime import datetime
 import os
 from openpyxl import Workbook, load_workbook
+import subprocess
+import time
 
 total = 0.00
 total_cheque = 0.00
@@ -9,6 +11,33 @@ total_dinheiro = 0.00
 total_recibos = 0
 cheques = []
 recibos_detalhes = []
+
+def atualizacao():
+    caminho_py = r"C:\Users\perer\PycharmProjects\fechamento\main.py"
+    arquivo_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), caminho_py)
+    arquivo_exe = r"C:\Users\perer\PycharmProjects\fechamento\dist\main.exe"
+
+    data_py = os.path.getmtime(arquivo_py)
+
+    if not os.path.exists(arquivo_exe):
+        data_exe = 0
+        
+    else:
+        data_exe = os.path.getmtime(arquivo_exe)
+
+    if data_py > data_exe:
+        print("Saiu nova atualização! atualizando...")
+        subprocess.run(["pyinstaller", "--onefile", "main.py"])
+
+        while not os.path.exists(arquivo_exe):
+            print("⌛ Aguarde, gerando o novo executável...")
+            time.sleep(2)
+
+        print("✅ Atualização concluída! Reiniciando...")
+        os.system(f"start {arquivo_exe}")
+
+    else:
+        print("Seu sistema está atualizado!")
 
 def recibos():
     global total, total_recibos
@@ -100,7 +129,9 @@ def salvar_fechamento():
         df_final.to_excel(writer, sheet_name=data_fechamento, index=False)
 
     print(f"✅ Fechamento de Caixa Salvo na aba '{data_fechamento}' dentro do arquivo {arquivo_excel}!")
+    input("Pressione ENTER para sair ...")
 
+atualizacao()
 recibos()
 fechamento()
 salvar_fechamento()
